@@ -101,7 +101,15 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className={styles["homeContainer"]}>
+      <div className={styles["homeContainer"]}
+      style={{
+        backgroundImage: 'url("/Group 23.png")',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    height: '100vh',
+    borderRadius: '0px'
+      }}>
         <h1 className={styles["homeContainerh1"]}>Добро пожаловать в HantaPoll!</h1><br/>
         <p className={styles["homeContainerP"]}>Пожалуйста, <u><Link href="/login">войдите</Link></u> или <u><Link href="/registr">зарегистрируйтесь</Link></u> для начала работы.</p>
       </div>
@@ -109,74 +117,111 @@ export default function Home() {
   }
 
   return (
-    <div 
-  className={styles["mainlk"]} 
-  style={{ 
-    // backgroundColor: '#4B3D6E', 
-    height: 'auto',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundImage: 'url("/Group 23.png")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    minHeight: '100vh',
-  }}
->
-<header className={styles["app-header"]} style={{ 
-    backgroundColor: '#FFF',
-    width: '100%',
-  }}>
+    <div className={styles["mainlk"]} style={{backgroundColor: '#fff'}}>
+      {/* Новая шапка */}
+      <header className={styles["app-header"]}>
         <Link href="/" className={styles["logo"]}>HantaPoll</Link>
         <div className={styles["header-nav"]}>
           <Link href="/pollbuild" className={styles["nav-link"]}>
             Конструктор опросов
           </Link>
-          <u><strong><Link href="/polls" className={styles["nav-link"]}>
+          <Link href="/polls" className={styles["nav-link"]}>
             Мои опросы
-          </Link></strong></u>
+          </Link>
         </div>
-        <Link href="/profile"><div className={styles["user-avatar"]}>
+        <div className={styles["user-avatar"]}>
           {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-        </div></Link>
+        </div>
       </header>
 
-      <div className={styles["homeContainer"]} style={{ backgroundColor: '#4B3D6E00' }}>
+      <div className={styles["homeContainer"]}>
         <div className={styles["profileHeader"]}>
-        </div>
-        <div className={styles["pollsSection"]}>
-          <h2 className={styles["inf"]}>ВАШИ ОПРОСЫ</h2>
-          
-          <div className={styles["actions"]}>
-            <Link href="/pollbuild" className={styles["createButton"]}>
-              Создать новый опрос
-            </Link>
+          <h1 className={styles["profileHeaderh1"]}>Настройки профиля</h1>
+        </div><br/><br/>
+        {!editMode ? (
+          <div className={styles["profileInfo"]}>
+            <p className={styles["inf1"]}><strong>Ваш Email:</strong> {user.email}</p>
+              <button 
+                  onClick={() => setEditMode(true)}
+                  className={styles["editButton"]}
+              >
+                  Редактировать профиль
+              </button>
+              <br/>
+              <button onClick={handleLogout} className={styles["logoutButton"]}>
+              Выйти
+              </button>
           </div>
-          
-          {polls.length === 0 ? (
-            <p className={styles["newp"]}>У вас пока нет созданных опросов - <u><Link href={"/pollbuild"}>исправьте это</Link></u>!)</p>
-          ) : (
-            <div className={styles["pollsList"]}>
-              {polls.map(poll => (
-                <div key={poll.id} className={styles["pollItem"]} style={{ backgroundColor: '#FFFFFF' }}>
-                  <h3>{poll.title}</h3><br/>
-                  <p>Вопросов: {poll.questions.length}</p>
-                  <p>Ответов: {poll.responsesCount || 0}</p>
-                  
-                  <div className={styles["pollActions"]}>
-                    <Link href={`/poll/${poll.id}`} className={styles["actionButton"]}>
-                      Пройти опрос
-                    </Link>
-                    <Link href={`/results/${poll.id}`} className={styles["actionButton"]}>
-                      Результаты
-                    </Link>
-                  </div>
-                </div>
-              ))}
+        ) : (
+          <form onSubmit={handleUpdateProfile} className={styles["profileForm"]}>
+            <h2 className={styles["inf1"]}>Редактирование профиля</h2><br/>
+            
+            <div className={styles["formGroup"]}>
+              <label>Новый Email:</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={styles["inplk"]}
+                required
+              />
             </div>
-          )}
-        </div> <br/>
+
+            <div className={styles["formGroup"]}>
+              <label>Текущий пароль:</label>
+              <input
+                type="password"
+                name="currentPassword"
+                value={formData.currentPassword}
+                className={styles["inplk"]}
+                placeholder="Текущий пароль" 
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <div className={styles["formGroup"]}>
+              <label>Новый пароль (оставьте пустым, если не хотите менять):</label>
+              <input
+                type="password"
+                name="newPassword"
+                value={formData.newPassword}
+                className={styles["inplk"]}
+                placeholder="Новый пароль" 
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {formData.newPassword && (
+              <div className={styles["formGroup"]}>
+                <label>Подтвердите новый пароль:</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                />
+              </div>
+            )}
+
+            {error && <p className={styles["error"]}>{error}</p>}
+            {success && <p className={styles["success"]}>{success}</p>}
+
+            <div className={styles["formActions"]}>
+              <button type="submit" className={styles["saveButton"]}>
+                Сохранить
+              </button>
+              <button 
+                type="button"
+                onClick={() => setEditMode(false)}
+                className={styles["cancelButton"]}
+              >
+                Отмена
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

@@ -4,12 +4,20 @@ import { useParams, useRouter } from 'next/navigation';
 import { doc, getDoc, collection, addDoc, updateDoc, increment } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebaseConfig';
 import styles from '@/app/page.module.css';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const TakePollPage = () => {
     const { id } = useParams();
     const [poll, setPoll] = useState(null);
     const [answers, setAnswers] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [designSettings, setDesignSettings] = useState({
+        primaryColor: '#4CAF50',
+        secondaryColor: '#2196F3',
+        fontFamily: 'Arial, sans-serif',
+        logo: null
+    });
+    const [authChecked, setAuthChecked] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -18,11 +26,19 @@ const TakePollPage = () => {
             const pollSnap = await getDoc(pollRef);
             
             if (pollSnap.exists()) {
-                setPoll({ id: pollSnap.id, ...pollSnap.data() });
+                const pollData = pollSnap.data();
+                setPoll({ id: pollSnap.id, ...pollData });
+                
+                if (pollData.designSettings) {
+                    setDesignSettings(pollData.designSettings);
+                }
+                
                 const initialAnswers = {};
-                pollSnap.data().questions.forEach(question => {
+                pollData.questions.forEach(question => {
                     if (question.type === 'text') {
                         initialAnswers[question.id] = '';
+                    } else if (question.type === 'scale') {
+                        initialAnswers[question.id] = question.scaleRange?.min || 1;
                     } else {
                         initialAnswers[question.id] = {};
                         question.options.forEach((_, index) => {
@@ -36,8 +52,29 @@ const TakePollPage = () => {
             }
         };
 
-        fetchPoll();
+        const checkAuth = async () => {
+            await new Promise(resolve => {
+                const unsubscribe = onAuthStateChanged(auth, (user) => {
+                    if (poll?.pollSettings?.requireLogin && !user) {
+                        router.push(`/login?redirect=/poll/${id}`);
+                    }
+                    setAuthChecked(true);
+                    resolve();
+                    unsubscribe();
+                });
+            });
+        };
+
+        fetchPoll().then(checkAuth);
     }, [id, router]);
+
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            document.documentElement.style.setProperty('--primary-color', designSettings.primaryColor);
+            document.documentElement.style.setProperty('--secondary-color', designSettings.secondaryColor);
+            document.documentElement.style.setProperty('--font-family', designSettings.fontFamily);
+        }
+    }, [designSettings]);
 
     const handleAnswerChange = (questionId, optionIndex, value) => {
         setAnswers(prev => ({
@@ -56,14 +93,35 @@ const TakePollPage = () => {
         }));
     };
 
+    const handleScaleChange = (questionId, value) => {
+        setAnswers(prev => ({
+            ...prev,
+            [questionId]: parseInt(value) || 0
+        }));
+    };
+
     const submitPoll = async () => {
+        if (!authChecked) return;
+        
+        if (poll.pollSettings.requireLogin && !auth.currentUser) {
+            router.push(`/login?redirect=/poll/${id}`);
+            return;
+        }
+
         try {
-            const responsesRef = collection(db, 'polls', id, 'responses');
-            await addDoc(responsesRef, {
+            const responseData = {
                 answers,
-                userId: auth.currentUser?.uid || null,
                 timestamp: new Date()
-            });
+            };
+
+            if (!poll.pollSettings.isAnonymous && auth.currentUser) {
+                responseData.userId = auth.currentUser.uid;
+                responseData.userEmail = auth.currentUser.email;
+            }
+
+            const responsesRef = collection(db, 'polls', id, 'responses');
+            await addDoc(responsesRef, responseData);
+
             const pollRef = doc(db, 'polls', id);
             await updateDoc(pollRef, {
                 responsesCount: increment(1)
@@ -76,22 +134,27 @@ const TakePollPage = () => {
         }
     };
 
-    if (!poll) return <div className={styles.loading}>Загрузка опроса...</div>;
+    if (!poll || !authChecked) return <div className={styles.loading}>Загрузка опроса...</div>;
 
     if (isSubmitted) {
         return (
-            <div className={styles.submittedContainer}>
-                <h1>СПАСИБО ЗА УЧАСТИЕ В ОПРОСЕ!</h1>
-                <p>Ваши ответы были сохранены.</p><br/>
-                <button 
-                    onClick={() => router.push(`/results/${id}`)}
-                    className={styles.buttonr}
-                >
-                    Посмотреть результаты
-                </button>
+            <div 
+                className={styles.submittedContainer}
+                style={{
+                    backgroundColor: designSettings.primaryColor + '20',
+                    fontFamily: designSettings.fontFamily,
+                }}
+            >
+                <h1 style={{ color: designSettings.primaryColor }}>СПАСИБО ЗА УЧАСТИЕ В ОПРОСЕ!</h1>
+                <br/>
+                <p>Ваши ответы были сохранены.</p>
+                <br/><br/>
                 <button 
                     onClick={() => router.push('/')}
                     className={styles.buttonSecondary}
+                    style={{
+                        backgroundColor: designSettings.secondaryColor
+                    }}
                 >
                     Вернуться на главную
                 </button>
@@ -100,11 +163,33 @@ const TakePollPage = () => {
     }
 
     return (
-        <div className={styles.pollContainer}>
-            <h1 className={styles.pollTitle}>{poll.title}</h1>
+        <div 
+            className={styles.pollContainer}
+            style={{ fontFamily: designSettings.fontFamily }}
+        >
+            {designSettings.logo && (
+                <div className={styles.pollLogo}>
+                    <img 
+                        src={designSettings.logo} 
+                        alt="Логотип опроса"
+                        style={{ height: '300px', width: '100%', borderRadius: '5px' }}
+                    />
+                </div>
+            )}
+            
+            <h1 
+                className={styles.pollTitle}
+                style={{ color: designSettings.primaryColor }}
+            >
+                {poll.title}
+            </h1>
             
             {poll.questions.map((question) => (
-                <div key={question.id} className={styles.questionCard}>
+                <div 
+                    key={question.id} 
+                    className={styles.questionCard}
+                    style={{ borderColor: designSettings.primaryColor }}
+                >
                     <h3 className={styles.questionText}>{question.text}</h3>
                     
                     {question.type === 'text' ? (
@@ -113,7 +198,30 @@ const TakePollPage = () => {
                             value={answers[question.id] || ''}
                             onChange={(e) => handleTextAnswerChange(question.id, e.target.value)}
                             placeholder="Введите ваш ответ..."
+                            style={{ 
+                                borderColor: designSettings.primaryColor,
+                                fontFamily: designSettings.fontFamily
+                            }}
                         />
+                    ) : question.type === 'scale' ? (
+                        <div className={styles.scaleContainer}>
+                            <input
+                                type="range"
+                                min={question.scaleRange?.min || 1}
+                                max={question.scaleRange?.max || 5}
+                                value={answers[question.id] || question.scaleRange?.min || 1}
+                                onChange={(e) => handleScaleChange(question.id, e.target.value)}
+                                className={styles.scaleInput}
+                                style={{
+                                    accentColor: designSettings.primaryColor
+                                }}
+                            />
+                            <div className={styles.scaleLabels}>
+                                <span>{question.scaleRange?.min || 1}</span>
+                                <span>{answers[question.id] || question.scaleRange?.min || 1}</span>
+                                <span>{question.scaleRange?.max || 5}</span>
+                            </div>
+                        </div>
                     ) : (
                         <div className={styles.optionsContainer}>
                             {question.options.map((option, index) => (
@@ -129,6 +237,9 @@ const TakePollPage = () => {
                                                 question.type === 'single' ? true : e.target.checked
                                             )}
                                             className={styles.optionInput}
+                                            style={{
+                                                accentColor: designSettings.primaryColor
+                                            }}
                                         />
                                         <span className={styles.optionText}>{option}</span>
                                     </label>
@@ -142,6 +253,10 @@ const TakePollPage = () => {
             <button 
                 className={styles.submitButton}
                 onClick={submitPoll}
+                style={{
+                    backgroundColor: designSettings.primaryColor,
+                    fontFamily: designSettings.fontFamily
+                }}
             >
                 Отправить ответы
             </button>

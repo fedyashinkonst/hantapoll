@@ -109,7 +109,7 @@ export const MainBlock = () => {
             whileTap="tap"
             onClick={handleCreatePollClick}
           >
-            {user ? "ЛИЧНЫЙ КАБИНЕТ" : "СОЗДАТЬ ОПРОС"}
+            {user ? "МОИ ОПРОСЫ" : "СОЗДАТЬ ОПРОС"}
           </motion.button>
         </motion.div>
 
