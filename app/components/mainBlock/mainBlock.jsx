@@ -95,11 +95,12 @@ export const MainBlock = () => {
               <></>
             )}
             <motion.div variants={headerItem}>
-              <p className={styles["headertxtel"]}>О НАС</p>
+              <a href="#aboutus"><p className={styles["headertxtelm"]}>О НАС</p></a>
             </motion.div>
             <motion.div variants={headerItem}>
-              <p className={styles["headertxtel"]}>КОНТАКТЫ</p>
+            <a href="#more"><p className={styles["headertxtel"]}>ПОДРОБНЕЕ</p></a>
             </motion.div>
+            <Link href={'/publicpolls'}><p className={styles["headertxtelm"]}>ОПРОСЫ</p></Link>
           </motion.div>
           
           <motion.button 
@@ -131,7 +132,7 @@ export const MainBlock = () => {
             </motion.div>
             <motion.div className={styles["headertxtmob1"]} variants={headerItem}>
               <a href="#aboutus"><p className={styles["headertxtelm"]}>О НАС</p></a>
-              <p className={styles["headertxtelm"]}>КОНТАКТЫ</p>
+              <Link href={'/publicpolls'}><p className={styles["headertxtelm"]}>ОПРОСЫ</p></Link>
             </motion.div>
           </motion.div>
         </motion.div>

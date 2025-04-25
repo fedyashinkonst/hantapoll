@@ -9,7 +9,6 @@ export const Footer = () => {
                 <div className={styles["footpl"]}>
                     <Link href={'/politic'}><p className={styles["footxt"]}>• Политика конфиденциальности</p></Link>
                     <Link href={'/politic'}><p className={styles["footxt"]}>• Условия использования</p></Link>
-                    <p className={styles["footxt"]}>• Контакты</p>
                 </div>
             </div>
         </div>

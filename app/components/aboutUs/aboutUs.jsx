@@ -22,7 +22,7 @@ export const AboutUs = () => {
                     >
                         <br/>
                         <p className={styles["cardBigTXT"]}>СОЗДАТЬ ОПРОС</p><br/><br/><br/><br/><br/>
-                        <p className={styles["cardSmallTXT"]}>Удобный конструктор анкет с шаблонами. 23 типа вопросов и настройка логических правил.</p>
+                        <p className={styles["cardSmallTXT"]}>Удобный конструктор анкет и настройка опроса.</p>
                     </motion.div>
                     <motion.div 
                         className={styles["card2"]}
@@ -32,7 +32,7 @@ export const AboutUs = () => {
                     >
                         <br/>
                         <p className={styles["cardBigTXT"]}>СОБРАТЬ ОТВЕТЫ</p><br/><br/><br/><br/><br/>
-                        <p className={styles["cardSmallTXT"]}>Онлайн-панель с 365 500 активных респондентов. И ещё 9 эффективных способов сбора</p>
+                        <p className={styles["cardSmallTXT"]}>Онлайн-панель с лучшими и удобными способами визуализации</p>
                     </motion.div>
                     <motion.div 
                         className={styles["card3"]}
@@ -42,7 +42,7 @@ export const AboutUs = () => {
                     >
                         <br/>
                         <p className={styles["cardBigTXT"]}>ПОЛУЧИТЬ РЕЗУЛЬТАТ</p><br/><br/><br/><br/><br/>
-                        <p className={styles["cardSmallTXT"]}>Результаты опроса в форматах PDF, Word, Excel, SPSS. Данные в виде графиков и диаграмм.</p>
+                        <p className={styles["cardSmallTXT"]}>Результаты опроса в форматах PDF, SVF, PNG. Данные в виде графиков, диаграмм и таблиц.</p>
                     </motion.div>
                 </div>
                 <div className={styles["imgm"]}>

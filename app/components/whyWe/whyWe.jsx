@@ -25,7 +25,7 @@ export const WhyWe = (props) => {
                         </svg>
                         <br/><br/>
                         <p className={styles["bigpremtxt"]}>Быстрое <br/>создание</p><br/>   
-                        <p className={styles["smallpremtxt"]}>Готовые шаблоны и интуитивный конструктор помогут запустить опрос за 2 минуты.</p>
+                        <p className={styles["smallpremtxt"]}>Интуитивный конструктор поможет запустить опрос за 2 минуты.</p>
                     </div>
                     <div className={styles["prem1"]}>
                     <svg
@@ -70,7 +70,7 @@ export const WhyWe = (props) => {
                         </svg>
                     <br/><br/>
                         <p className={styles["bigpremtxt"]}>Результаты <br/> в реальном времени</p><br/>
-                        <p className={styles["smallpremtxt"]}>Готовые шаблоны и интуитивный конструктор помогут запустить опрос за 2 минуты.</p>
+                        <p className={styles["smallpremtxt"]}>Удобная подача информации в виде диаграмм и таблиц</p>
                     </div>
                 </div>
             </div>

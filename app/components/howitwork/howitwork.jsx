@@ -1,8 +1,9 @@
 import styles from "@/app/page.module.css";
 
+
 export const HowItWork = (props) => {
     return (
-        <div className={styles["mainWork"]}>
+        <div className={styles["mainWork"]} id='more'>
             <div className={styles["infoWork"]}>
                 <br/>
                 <h1 className={styles["bigtxtWork"]}>КАК ЭТО РАБОТАЕТ</h1><br/><br/><br/>
@@ -131,7 +132,7 @@ export const HowItWork = (props) => {
                         </defs>
                     </svg>
                 </div>
-                <button className={styles["buttonwork"]}>СОЗДАТЬ ОПРОС</button>
+                <a href='/login'><button className={styles["buttonwork"]}>СОЗДАТЬ ОПРОС</button></a>
             </div>
         </div>
     );
