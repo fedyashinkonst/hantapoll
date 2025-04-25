@@ -263,7 +263,7 @@ const PollResultsPage = () => {
             }
             
             await navigator.clipboard.writeText(pollUrl);
-            toast.success('Ссылка на опрос скопирована в буфер обмена!');
+            toast.success('Ссылка на опрос скопирована!');
         } catch (err) {
             console.error('Не удалось скопировать ссылку:', err);
             toast.error('Не удалось скопировать ссылку');
@@ -274,7 +274,11 @@ const PollResultsPage = () => {
     if (!poll) return <div className={styles.error}>Опрос не найден</div>;
 
     return (
-        <div className={styles.pageContainer}>
+        <div className={styles.pageContainer} style={{
+            backgroundColor: '#fff',
+            color: '#000',
+            textDecoration: 'none'
+        }}>
             <header className={styles["app-header"]}>
                 <Link href="/" className={styles["logo"]}>HantaPoll</Link>
                 <div className={styles["header-nav"]}>
@@ -285,9 +289,9 @@ const PollResultsPage = () => {
                         Мои опросы
                     </Link>
                 </div>
-                <div className={styles["user-avatar"]}>
+                <Link href="/profile"><div className={styles["user-avatar"]}>
                     {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-                </div>
+                </div></Link>
             </header>
 
             <div className={styles.resultsContainer} ref={resultsRef} style={{
@@ -296,26 +300,7 @@ const PollResultsPage = () => {
                 <ToastContainer position="top-right" autoClose={3000} />
                 
                 <div className={styles.resultsHeader}>
-                    <h1>АНАЛИТИКА ОПРОСА: "{poll.title}"</h1>
-                    <div className={styles.headerActions}>
-                        <div className={styles.exportControls}>
-                            <button onClick={exportToCSV} className={styles.exportButton}>
-                                CSV
-                            </button>
-                            <button onClick={exportToPDF} className={styles.exportButton}>
-                                PDF
-                            </button>
-                            <button onClick={exportToPNG} className={styles.exportButton}>
-                                PNG
-                            </button>
-                        </div>
-                        <button 
-                            onClick={copyPollLink}
-                            className={styles.shareButton}
-                        >
-                            Поделиться опросом
-                        </button>
-                    </div>
+                    <h1 className={styles.maintxt}>АНАЛИТИКА ОПРОСА: "{poll.title}"</h1>
                 </div>
 
                 <div className={styles.summaryInfo}>
@@ -350,7 +335,7 @@ const PollResultsPage = () => {
                                 <option value="bar">Столбчатая</option>
                                 <option value="pie">Круговая</option>
                                 <option value="line">Линейная</option>
-                            </select>
+                            </select> <br/>
                         </div>
                     )}
 
@@ -573,6 +558,25 @@ const PollResultsPage = () => {
                         </div>
                     </div>
                 )}
+                <div className={styles.headerActions}>
+                        <div className={styles.exportControls}>
+                            <button onClick={exportToCSV} className={styles.exportButton}>
+                                CSV
+                            </button>
+                            <button onClick={exportToPDF} className={styles.exportButton}>
+                                PDF
+                            </button>
+                            <button onClick={exportToPNG} className={styles.exportButton}>
+                                PNG
+                            </button>
+                        </div>
+                        <button 
+                            onClick={copyPollLink}
+                            className={styles.shareButton}
+                        >
+                            Поделиться опросом
+                        </button>
+                    </div>
             </div>
         </div>
     );

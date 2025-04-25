@@ -133,6 +133,7 @@ const TakePollPage = () => {
             alert("Произошла ошибка при отправке ответов");
         }
     };
+    document.body.setAttribute('style', `background-color: ${designSettings.primaryColor};`);
 
     if (!poll || !authChecked) return <div className={styles.loading}>Загрузка опроса...</div>;
 
@@ -141,11 +142,13 @@ const TakePollPage = () => {
             <div 
                 className={styles.submittedContainer}
                 style={{
-                    backgroundColor: designSettings.primaryColor + '20',
+                    // backgroundColor: designSettings.primaryColor + '20',
+                    background: designSettings.primaryColor,
                     fontFamily: designSettings.fontFamily,
+                    color: designSettings.secondaryColor,
                 }}
             >
-                <h1 style={{ color: designSettings.primaryColor }}>СПАСИБО ЗА УЧАСТИЕ В ОПРОСЕ!</h1>
+                <h1 style={{ color: designSettings.secondaryColor }}>СПАСИБО ЗА УЧАСТИЕ В ОПРОСЕ!</h1>
                 <br/>
                 <p>Ваши ответы были сохранены.</p>
                 <br/><br/>
@@ -153,7 +156,8 @@ const TakePollPage = () => {
                     onClick={() => router.push('/')}
                     className={styles.buttonSecondary}
                     style={{
-                        backgroundColor: designSettings.secondaryColor
+                        backgroundColor: designSettings.secondaryColor,
+                        color: designSettings.primaryColor
                     }}
                 >
                     Вернуться на главную
@@ -165,7 +169,8 @@ const TakePollPage = () => {
     return (
         <div 
             className={styles.pollContainer}
-            style={{ fontFamily: designSettings.fontFamily }}
+            style={{ fontFamily: designSettings.fontFamily,
+            backgroundColor: designSettings.primaryColor }}
         >
             {designSettings.logo && (
                 <div className={styles.pollLogo}>
@@ -179,7 +184,7 @@ const TakePollPage = () => {
             
             <h1 
                 className={styles.pollTitle}
-                style={{ color: designSettings.primaryColor }}
+                style={{ color: designSettings.secondaryColor }}
             >
                 {poll.title}
             </h1>
@@ -254,8 +259,9 @@ const TakePollPage = () => {
                 className={styles.submitButton}
                 onClick={submitPoll}
                 style={{
-                    backgroundColor: designSettings.primaryColor,
-                    fontFamily: designSettings.fontFamily
+                    backgroundColor: designSettings.secondaryColor,
+                    fontFamily: designSettings.fontFamily,
+                    color: designSettings.primaryColor
                 }}
             >
                 Отправить ответы

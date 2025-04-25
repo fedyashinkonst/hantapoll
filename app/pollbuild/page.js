@@ -24,8 +24,8 @@ const PollCreator = () => {
   const [user, setUser] = useState(null);
   const [publishedPollId, setPublishedPollId] = useState(null);
   const [designSettings, setDesignSettings] = useState({
-    primaryColor: '#D1C6E7',
-    secondaryColor: '#4B3D6E',
+    primaryColor: '#ffffff',
+    secondaryColor: '#000000',
     fontFamily: 'Arial, sans-serif',
     logo: null
   });
@@ -226,7 +226,7 @@ const PollCreator = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        // justifyContent: 'center',
         backgroundImage: 'url("/Group 23.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -250,311 +250,313 @@ const PollCreator = () => {
         </div></Link>
       </header>
 
-      <div className={styles["poll-creator"]}
-      style={{
-        height: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#ffffff00'
-      }}>
-        <div className={styles["creator-header"]}>
-          <input
-            type="text"
-            value={pollTitle}
-            onChange={(e) => setPollTitle(e.target.value)}
-            className={styles["poll-title-input"]}
-          />
-          <div className={styles["header-actions"]}>
-            <button 
-              className={styles["publish-btn"]}
-              onClick={publishPoll}
-            >
-              Опубликовать
-            </button>
-          </div>
-        </div>
-
-        <div className={styles["questions-container"]}>
-          {questions.map((question) => (
-            <div key={question.id} className={styles["question-card"]}>
-              <div className={styles["question-header"]}>
-                <input
-                  type="text"
-                  placeholder="Введите вопрос"
-                  value={question.text}
-                  onChange={(e) => 
-                    handleQuestionChange(question.id, 'text', e.target.value)
-                  }
-                  className={styles["question-input"]}
-                />
-                <select
-                  value={question.type}
-                  onChange={(e) => 
-                    handleQuestionChange(question.id, 'type', e.target.value)
-                  }
-                  className={styles["question-type"]}
-                >
-                  <option value="single">Один вариант</option>
-                  <option value="multiple">Несколько вариантов</option>
-                  <option value="text">Текстовый ответ</option>
-                  <option value="scale">Шкала</option>
-                </select>
-                {questions.length > 1 && (
-                  <button 
-                    onClick={() => removeQuestion(question.id)}
-                    className={styles["remove-question-btn"]}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-
-              {question.type === 'scale' ? (
-                <div className={styles["scale-controls"]}>
-                  <div className={styles["form-group"]}>
-                    <label>Минимальное значение:</label>
-                    <input
-                      type="number"
-                      value={question.scaleRange.min}
-                      onChange={(e) => 
-                        handleScaleChange(question.id, 'min', e.target.value)
-                      }
-                      min="0"
-                    />
-                  </div>
-                  <div className={styles["form-group"]}>
-                    <label>Максимальное значение:</label>
-                    <input
-                      type="number"
-                      value={question.scaleRange.max}
-                      onChange={(e) => 
-                        handleScaleChange(question.id, 'max', e.target.value)
-                      }
-                      min={question.scaleRange.min + 1}
-                    />
-                  </div>
-                </div>
-              ) : question.type !== 'text' ? (
-                <div className={styles["options-container"]}>
-                  {question.options.map((option, index) => (
-                    <div key={index} className={styles["option-item"]}>
-                      {question.type === 'single' ? (
-                        <input type="radio" disabled />
-                      ) : (
-                        <input type="checkbox" disabled />
-                      )}
-                      <input
-                        type="text"
-                        placeholder={`Вариант ${index + 1}`}
-                        value={option}
-                        onChange={(e) => 
-                          handleOptionChange(question.id, index, e.target.value)
-                        }
-                        className={styles["option-input"]}
-                      />
-                      {question.options.length > 2 && (
-                        <button 
-                          onClick={() => {
-                            const newOptions = [...question.options];
-                            newOptions.splice(index, 1);
-                            handleQuestionChange(question.id, 'options', newOptions);
-                          }}
-                          className={styles["remove-option-btn"]}
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button 
-                    onClick={() => addOption(question.id)}
-                    className={styles["add-option-btn"]}
-                  >
-                    + Добавить вариант
-                  </button>
-                </div>
-              ) : null}
+      {!publishedPollId ? (
+        <div className={styles["poll-creator"]}
+        style={{
+          height: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#ffffff00'
+        }}>
+          <div className={styles["creator-header"]}>
+            <input
+              type="text"
+              value={pollTitle}
+              onChange={(e) => setPollTitle(e.target.value)}
+              className={styles["poll-title-input"]}
+            />
+            <div className={styles["header-actions"]}>
+              <button 
+                className={styles["publish-btn"]}
+                onClick={publishPoll}
+              >
+                Опубликовать
+              </button>
             </div>
-          ))}
+          </div>
 
-          <button onClick={addQuestion} className={styles["add-question-btn"]}>
-            + Добавить вопрос
-          </button><br/>
-        </div>
-
-        <div className={styles["settings-tabs"]}>
-          <div className={styles["settings-section"]}>
-            <h3>Настройки дизайна</h3>
-            <div className={styles["design-controls"]}>
-              <div className={styles["form-group"]}>
-                <label>Основной цвет:</label>
-                <input
-                  type="color"
-                  name="primaryColor"
-                  value={designSettings.primaryColor}
-                  onChange={handleDesignChange}
-                />
-              </div>
-              <div className={styles["form-group"]}>
-                <label>Дополнительный цвет:</label>
-                <input
-                  type="color"
-                  name="secondaryColor"
-                  value={designSettings.secondaryColor}
-                  onChange={handleDesignChange}
-                />
-              </div>
-              <div className={styles["form-group"]}>
-                <label>Шрифт:</label>
-                <select
-                  name="fontFamily"
-                  value={designSettings.fontFamily}
-                  onChange={handleDesignChange}
-                  className={styles["question-type"]}
-                >
-                  <option value="Arial, sans-serif">Arial</option>
-                  <option value="Helvetica, sans-serif">Helvetica</option>
-                  <option value="'Times New Roman', serif">Times New Roman</option>
-                </select>
-              </div>
-              <div className={styles["form-group"]}>
-                <label>Логотип:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                />
-                {designSettings.logo && (
-                  <div className={styles["logo-preview"]}>
-                    <img 
-                      src={designSettings.logo} 
-                      alt="Логотип опроса" 
-                      style={{ maxWidth: '100px', maxHeight: '50px' }}
-                    />
+          <div className={styles["questions-container"]}>
+            {questions.map((question) => (
+              <div key={question.id} className={styles["question-card"]}>
+                <div className={styles["question-header"]}>
+                  <input
+                    type="text"
+                    placeholder="Введите вопрос"
+                    value={question.text}
+                    onChange={(e) => 
+                      handleQuestionChange(question.id, 'text', e.target.value)
+                    }
+                    className={styles["question-input"]}
+                  />
+                  <select
+                    value={question.type}
+                    onChange={(e) => 
+                      handleQuestionChange(question.id, 'type', e.target.value)
+                    }
+                    className={styles["question-type"]}
+                  >
+                    <option value="single">Один вариант</option>
+                    <option value="multiple">Несколько вариантов</option>
+                    <option value="text">Текстовый ответ</option>
+                    <option value="scale">Шкала</option>
+                  </select>
+                  {questions.length > 1 && (
                     <button 
-                      onClick={() => setDesignSettings(prev => ({ ...prev, logo: null }))}
-                      className={styles["remove-logo-btn"]}
+                      onClick={() => removeQuestion(question.id)}
+                      className={styles["remove-question-btn"]}
                     >
-                      Удалить
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                {question.type === 'scale' ? (
+                  <div className={styles["scale-controls"]}>
+                    <div className={styles["form-group"]}>
+                      <label>Минимальное значение:</label>
+                      <input
+                        type="number"
+                        value={question.scaleRange.min}
+                        onChange={(e) => 
+                          handleScaleChange(question.id, 'min', e.target.value)
+                        }
+                        className={styles["sch"]}
+                        min="0"
+                      />
+                    </div>
+                    <div className={styles["form-group"]}>
+                      <label>Максимальное значение:</label>
+                      <input
+                        className={styles["sch"]}
+                        type="number"
+                        value={question.scaleRange.max}
+                        onChange={(e) => 
+                          handleScaleChange(question.id, 'max', e.target.value)
+                        }
+                        min={question.scaleRange.min + 1}
+                      />
+                    </div>
+                  </div>
+                ) : question.type !== 'text' ? (
+                  <div className={styles["options-container"]}>
+                    {question.options.map((option, index) => (
+                      <div key={index} className={styles["option-item"]}>
+                        {question.type === 'single' ? (
+                          <input type="radio" disabled />
+                        ) : (
+                          <input type="checkbox" disabled />
+                        )}
+                        <input
+                          type="text"
+                          placeholder={`Вариант ${index + 1}`}
+                          value={option}
+                          onChange={(e) => 
+                            handleOptionChange(question.id, index, e.target.value)
+                          }
+                          className={styles["option-input"]}
+                        />
+                        {question.options.length > 2 && (
+                          <button 
+                            onClick={() => {
+                              const newOptions = [...question.options];
+                              newOptions.splice(index, 1);
+                              handleQuestionChange(question.id, 'options', newOptions);
+                            }}
+                            className={styles["remove-option-btn"]}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => addOption(question.id)}
+                      className={styles["add-option-btn"]}
+                    >
+                      + Добавить вариант
                     </button>
                   </div>
+                ) : null}
+              </div>
+            ))}
+
+            <button onClick={addQuestion} className={styles["add-question-btn"]}>
+              + Добавить вопрос
+            </button><br/><br/><br/>
+          </div>
+
+          <div className={styles["settings-tabs"]}>
+            <div className={styles["settings-section"]}>
+              <h3>Настройки дизайна</h3>
+              <div className={styles["design-controls"]}>
+                <div className={styles["form-group"]}>
+                  <label>Основной цвет:</label>
+                  <input
+                    type="color"
+                    name="primaryColor"
+                    value={designSettings.primaryColor}
+                    onChange={handleDesignChange}
+                  />
+                </div>
+                <div className={styles["form-group"]}>
+                  <label>Дополнительный цвет:</label>
+                  <input
+                    type="color"
+                    name="secondaryColor"
+                    value={designSettings.secondaryColor}
+                    onChange={handleDesignChange}
+                  />
+                </div>
+                <div className={styles["form-group"]}>
+                  <label>Шрифт:</label>
+                  <select
+                    name="fontFamily"
+                    value={designSettings.fontFamily}
+                    onChange={handleDesignChange}
+                    className={styles["question-type"]}
+                  >
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="Helvetica, sans-serif">Helvetica</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                  </select>
+                </div>
+                <div className={styles["form-group"]}>
+                  <label>Логотип:</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                  />
+                  {designSettings.logo && (
+                    <div className={styles["logo-preview"]}>
+                      <img 
+                        src={designSettings.logo} 
+                        alt="Логотип опроса" 
+                        style={{ maxWidth: '100px', maxHeight: '50px' }}
+                      />
+                      <button 
+                        onClick={() => setDesignSettings(prev => ({ ...prev, logo: null }))}
+                        className={styles["remove-logo-btn"]}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className={styles["settings-section"]}>
+              <h3>Настройки времени</h3>
+              <div className={styles["time-controls"]}>
+                <div className={styles["form-group"]}>
+                  <label className={styles["timelim"]}>
+                    <input
+                      type="checkbox"
+                      name="hasTimeLimit"
+                      checked={timeSettings.hasTimeLimit}
+                      onChange={handleTimeChange}
+                    />
+                      Ограничить по времени
+                  </label>
+                </div>
+                {timeSettings.hasTimeLimit && (
+                  <>
+                    <div className={styles["form-group"]}>
+                      <label>Начало опроса:</label>
+                      <input
+                        type="datetime-local"
+                        name="startTime"
+                        value={timeSettings.startTime}
+                        onChange={handleTimeChange}
+                      />
+                    </div>
+                    <div className={styles["form-group"]}>
+                      <label>Окончание опроса:</label>
+                      <input
+                        type="datetime-local"
+                        name="endTime"
+                        value={timeSettings.endTime}
+                        onChange={handleTimeChange}
+                        min={timeSettings.startTime}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             </div>
-          </div>
 
-          <div className={styles["settings-section"]}>
-            <h3>Настройки времени</h3>
-            <div className={styles["time-controls"]}>
-              <div className={styles["form-group"]}>
-                <label className={styles["timelim"]}>
-                  <input
-                    type="checkbox"
-                    name="hasTimeLimit"
-                    checked={timeSettings.hasTimeLimit}
-                    onChange={handleTimeChange}
-                  />
-                  Ограничить по времени
-                </label>
-              </div>
-              {timeSettings.hasTimeLimit && (
-                <>
-                  <div className={styles["form-group"]}>
-                    <label>Начало опроса:</label>
+            <div className={styles["settings-section"]}>
+              <h3>Настройки доступа</h3>
+              <div className={styles["access-controls"]}>
+                <div className={styles["form-group"]}>
+                  <label>
                     <input
-                      type="datetime-local"
-                      name="startTime"
-                      value={timeSettings.startTime}
-                      onChange={handleTimeChange}
+                      type="checkbox"
+                      name="isAnonymous"
+                      checked={pollSettings.isAnonymous}
+                      onChange={handlePollSettingChange}
+                      disabled={pollSettings.requireLogin}
                     />
-                  </div>
-                  <div className={styles["form-group"]}>
-                    <label>Окончание опроса:</label>
+                    Анонимные ответы
+                  </label>
+                  <p className={styles["setting-description"]}>
+                    Ответы не будут привязаны к пользователям
+                  </p>
+                </div>
+                <div className={styles["form-group"]}>
+                  <label>
                     <input
-                      type="datetime-local"
-                      name="endTime"
-                      value={timeSettings.endTime}
-                      onChange={handleTimeChange}
-                      min={timeSettings.startTime}
+                      type="checkbox"
+                      name="requireLogin"
+                      checked={pollSettings.requireLogin}
+                      onChange={handlePollSettingChange}
                     />
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className={styles["settings-section"]}>
-            <h3>Настройки доступа</h3>
-            <div className={styles["access-controls"]}>
-              <div className={styles["form-group"]}>
-                <label>
-                  <input
-                    type="checkbox"
-                    name="isAnonymous"
-                    checked={pollSettings.isAnonymous}
-                    onChange={handlePollSettingChange}
-                    disabled={pollSettings.requireLogin}
-                  />
-                  Анонимные ответы
-                </label>
-                <p className={styles["setting-description"]}>
-                  Ответы не будут привязаны к пользователям
-                </p>
-              </div>
-              <div className={styles["form-group"]}>
-                <label>
-                  <input
-                    type="checkbox"
-                    name="requireLogin"
-                    checked={pollSettings.requireLogin}
-                    onChange={handlePollSettingChange}
-                  />
-                  Требовать авторизацию
-                </label>
-                <p className={styles["setting-description"]}>
-                  Только зарегистрированные пользователи смогут отвечать
-                </p>
+                    Требовать авторизацию
+                  </label>
+                  <p className={styles["setting-description"]}>
+                    Только зарегистрированные пользователи смогут отвечать
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        {publishedPollId && (
-          <div className={styles["poll-share-section"]}>
-            <h3>Опрос опубликован!</h3>
-            <div className={styles["share-controls"]}>
-              <div className={styles["share-link"]}>
-                <label>Ссылка на опрос:</label>
-                <input
-                  type="text"
-                  value={pollUrl}
-                  readOnly
-                  onClick={(e) => e.target.select()}
-                />
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(pollUrl);
-                    toast.info('Ссылка скопирована в буфер обмена!');
-                  }}
-                  className={styles["copy-btn"]}
-                >
-                  Копировать
-                </button>
-              </div>
-              <div className={styles["qr-code"]}>
-                <QRCode 
-                  value={pollUrl}
-                  size={128}
-                  level="H"
-                />
-                <p>QR-код для опроса</p>
-              </div>
+      ) : (
+        <div className={styles["poll-share-section"]}>
+          <h3>Опрос опубликован!</h3>
+          <div className={styles["share-controls"]}>
+            <div className={styles["share-link"]}>
+              <label>Ссылка на опрос:</label>
+              <input
+                type="text"
+                value={pollUrl}
+                readOnly
+                onClick={(e) => e.target.select()}
+              />
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(pollUrl);
+                  toast.info('Ссылка скопирована!');
+                }}
+                className={styles["copy-btn"]}
+              >
+                Копировать
+              </button>
+            </div>
+            <div className={styles["qr-code"]}>
+              <QRCode 
+                value={pollUrl}
+                size={128}
+                level="H"
+              />
+              <p>QR-код для опроса</p>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

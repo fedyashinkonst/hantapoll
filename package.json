@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@next-auth/firebase-adapter": "^2.0.1",
+    "@sendgrid/mail": "^8.1.5",
     "aos": "^2.3.4",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "chart.js": "^4.4.9",
     "firebase": "^11.6.0",
+    "firebase-functions": "^6.3.2",
     "framer-motion": "^12.7.4",
     "html-to-image": "^1.11.13",
     "jspdf": "^3.0.1",

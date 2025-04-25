@@ -117,7 +117,18 @@ export default function Home() {
   }
 
   return (
-    <div className={styles["mainlk"]} style={{backgroundColor: '#fff'}}>
+    <div className={styles["mainlk"]} style={{ 
+        // backgroundColor: '#4B3D6E', 
+        height: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        backgroundImage: 'url("/Group 23.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '100vh',
+      }}>
       {/* Новая шапка */}
       <header className={styles["app-header"]}>
         <Link href="/" className={styles["logo"]}>HantaPoll</Link>
