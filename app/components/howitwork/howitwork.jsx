@@ -132,7 +132,7 @@ export const HowItWork = (props) => {
                         </defs>
                     </svg>
                 </div>
-                <a href='/login'><button className={styles["buttonwork"]}>СОЗДАТЬ ОПРОС</button></a>
+                <a href='/pollbuild'><button className={styles["buttonwork"]}>СОЗДАТЬ ОПРОС</button></a>
             </div>
         </div>
     );

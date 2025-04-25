@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { collection, getDocs, query, where, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebaseConfig';
 import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ export default function Home() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [copiedPollId, setCopiedPollId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -56,44 +57,46 @@ export default function Home() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      setError('Ошибка при выходе: ' + error.message);
+  const copyPollLink = (pollId) => {
+    if (!navigator.clipboard) {
+      const textArea = document.createElement('textarea');
+      const pollUrl = `${window.location.origin}/poll/${pollId}`;
+      textArea.value = pollUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        setCopiedPollId(pollId);
+        setTimeout(() => setCopiedPollId(null), 2000);
+      } catch (err) {
+        setError('Не удалось скопировать ссылку');
+        console.error('Ошибка при копировании:', err);
+      }
+      document.body.removeChild(textArea);
+      return;
     }
+    const pollUrl = `${window.location.origin}/poll/${pollId}`;
+    navigator.clipboard.writeText(pollUrl)
+      .then(() => {
+        setCopiedPollId(pollId);
+        setTimeout(() => setCopiedPollId(null), 2000);
+      })
+      .catch(err => {
+        setError('Не удалось скопировать ссылку');
+        console.error('Ошибка при копировании:', err);
+      });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    try {
-      const credential = EmailAuthProvider.credential(
-        user.email,
-        formData.currentPassword
-      );
-      await reauthenticateWithCredential(user, credential);
-
-      if (formData.email !== user.email) {
-        await updateEmail(user, formData.email);
+  const handleDeletePoll = async (pollId) => {
+    if (window.confirm('Вы уверены, что хотите удалить этот опрос? Это действие нельзя отменить.')) {
+      try {
+        await deleteDoc(doc(db, 'polls', pollId));
+        setPolls(polls.filter(poll => poll.id !== pollId));
+        setSuccess('Опрос успешно удален');
+      } catch (error) {
+        setError('Ошибка при удалении опроса: ' + error.message);
       }
-
-      if (formData.newPassword && formData.newPassword === formData.confirmPassword) {
-        await updatePassword(user, formData.newPassword);
-      }
-
-      setSuccess('Профиль успешно обновлен!');
-      setEditMode(false);
-    } catch (error) {
-      setError('Ошибка обновления: ' + error.message);
-      console.error(error);
     }
   };
 
@@ -110,24 +113,23 @@ export default function Home() {
 
   return (
     <div 
-  className={styles["mainlk"]} 
-  style={{ 
-    // backgroundColor: '#4B3D6E', 
-    height: 'auto',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundImage: 'url("/Group 23.png")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    minHeight: '100vh',
-  }}
->
-<header className={styles["app-header"]} style={{ 
-    backgroundColor: '#FFF',
-    width: '100%',
-  }}>
+      className={styles["mainlk"]} 
+      style={{ 
+        height: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        backgroundImage: 'url("/Group 23.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '100vh',
+      }}
+    >
+      <header className={styles["app-header"]} style={{ 
+        backgroundColor: '#FFF',
+        width: '100%',
+      }}>
         <Link href="/" className={styles["logo"]}>HantaPoll</Link>
         <div className={styles["header-nav"]}>
           <Link href="/pollbuild" className={styles["nav-link"]}>
@@ -165,12 +167,23 @@ export default function Home() {
                   <p>Ответов: {poll.responsesCount || 0}</p>
                   
                   <div className={styles["pollActions"]}>
-                    <Link href={`/poll/${poll.id}`} className={styles["actionButton"]}>
-                      Пройти опрос
-                    </Link>
+                    <button 
+                      onClick={() => copyPollLink(poll.id)} 
+                      className={styles["actionButton"]}
+                    >
+                      {copiedPollId === poll.id ? 'Скопировано!' : 'Поделиться'}
+                    </button>
                     <Link href={`/results/${poll.id}`} className={styles["actionButton"]}>
                       Результаты
                     </Link>
+                  </div>
+                  <div className={styles["deleteAction"]}>
+                    <button 
+                      onClick={() => handleDeletePoll(poll.id)} 
+                      className={`${styles["delButton"]} ${styles["deleteButton"]}`}
+                    >
+                      Удалить
+                    </button>
                   </div>
                 </div>
               ))}

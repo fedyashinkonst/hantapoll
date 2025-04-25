@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import QRCode from 'react-qr-code';
 
 const PollCreator = () => {
-  const [pollTitle, setPollTitle] = useState('НОВЫЙ ОПРОС');
+  const [pollTitle, setPollTitle] = useState('НАЗВАНИЕ ОПРОСА');
   const [questions, setQuestions] = useState([
     {
       id: 1,
@@ -166,56 +166,81 @@ const PollCreator = () => {
 
   const publishPoll = async () => {
     if (!user) return;
+    if (!pollTitle.trim() || pollTitle.trim() === 'НОВЫЙ ОПРОС') {
+        toast.error('Введите уникальное название опроса');
+        return;
+    }
+    if (questions.length === 0) {
+        toast.error('Добавьте хотя бы один вопрос');
+        return;
+    }
 
+    for (const question of questions) {
+        if (!question.text.trim()) {
+            toast.error(`Вопрос #${question.id}: введите текст вопроса`);
+            return;
+        }
+
+        if (question.type !== 'text' && question.type !== 'scale') {
+            if (question.options.length < 2) {
+                toast.error(`Вопрос #${question.id}: добавьте минимум 2 варианта ответа`);
+                return;
+            }
+            const emptyOptions = question.options.filter(opt => !opt.trim());
+            if (emptyOptions.length > 0) {
+                toast.error(`Вопрос #${question.id}: все варианты ответа должны быть заполнены`);
+                return;
+            }
+            const uniqueOptions = new Set(question.options.map(opt => opt.trim().toLowerCase()));
+            if (uniqueOptions.size !== question.options.length) {
+                toast.error(`Вопрос #${question.id}: удалите повторяющиеся варианты ответа`);
+                return;
+            }
+        }
+        if (question.type === 'scale') {
+            if (question.scaleRange.min >= question.scaleRange.max) {
+                toast.error(`Вопрос #${question.id}: максимальное значение шкалы должно быть больше минимального`);
+                return;
+            }
+        }
+    }
     if (pollSettings.requireLogin && pollSettings.isAnonymous) {
-      toast.error('Нельзя одновременно требовать авторизацию и разрешать анонимные ответы');
-      return;
+        toast.error('Нельзя одновременно требовать авторизацию и разрешать анонимные ответы');
+        return;
     }
 
     try {
-      const pollData = {
-        title: pollTitle,
-        questions: questions.map(q => ({
-          id: q.id,
-          text: q.text,
-          type: q.type,
-          options: q.type !== 'text' && q.type !== 'scale' ? q.options.filter(opt => opt.trim() !== '') : [],
-          scaleRange: q.type === 'scale' ? q.scaleRange : null
-        })),
-        designSettings,
-        timeSettings,
-        pollSettings: {
-          isAnonymous: pollSettings.isAnonymous,
-          requireLogin: pollSettings.requireLogin
-        },
-        createdAt: serverTimestamp(),
-        createdBy: user.uid,
-        responsesCount: 0
-      };
+        const pollData = {
+            title: pollTitle.trim(),
+            questions: questions.map(q => ({
+                id: q.id,
+                text: q.text.trim(),
+                type: q.type,
+                options: q.type !== 'text' && q.type !== 'scale' 
+                    ? q.options.map(opt => opt.trim()) 
+                    : [],
+                scaleRange: q.type === 'scale' ? q.scaleRange : null
+            })),
+            designSettings,
+            timeSettings,
+            pollSettings: {
+                isAnonymous: pollSettings.isAnonymous,
+                requireLogin: pollSettings.requireLogin
+            },
+            createdAt: serverTimestamp(),
+            createdBy: user.uid,
+            responsesCount: 0
+        };
 
-      const docRef = await addDoc(collection(db, 'polls'), pollData);
-      setPublishedPollId(docRef.id);
-      
-      toast.success('Опрос успешно опубликован!', {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+        const docRef = await addDoc(collection(db, 'polls'), pollData);
+        setPublishedPollId(docRef.id);
+        
+        toast.success('Опрос успешно опубликован!');
     } catch (error) {
-      console.error("Ошибка при публикации опроса:", error);
-      toast.error('Ошибка при публикации опроса', {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+        console.error("Ошибка при публикации опроса:", error);
+        toast.error('Ошибка при публикации опроса');
     }
-  };
+};
 
   const pollUrl = publishedPollId ? `${window.location.origin}/poll/${publishedPollId}` : '';
 
@@ -226,7 +251,6 @@ const PollCreator = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        // justifyContent: 'center',
         backgroundImage: 'url("/Group 23.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',

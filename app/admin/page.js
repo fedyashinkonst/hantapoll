@@ -15,7 +15,7 @@ const AdminPage = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const ADMIN_PASSWORD = '12345';
+  const ADMIN_PASSWORD = 'qwertyuiop1234567890';
 
   useEffect(() => {
     const storedAuth = localStorage.getItem('adminAuth');
@@ -129,7 +129,10 @@ const AdminPage = () => {
   }
 
   return (
-    <div className={styles.adminContainer}>
+    <div className={styles.adminContainer}
+      style={{
+        backgroundColor: '#fff'
+      }}>
       <div className={styles.header}>
         <h1 className={styles.headerh1}>АДМИНКА</h1>
         <button onClick={handleLogout} className={styles.logoutButton}>

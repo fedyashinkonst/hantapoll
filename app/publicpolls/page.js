@@ -26,7 +26,6 @@ const PublicPollsPage = () => {
     const fetchPublicPolls = async () => {
       try {
         const pollsRef = collection(db, 'polls');
-        // Получаем только опросы, которые не требуют авторизации или если пользователь авторизован
         const q = query(pollsRef, where('pollSettings.requireLogin', '==', false));
         const querySnapshot = await getDocs(q);
         

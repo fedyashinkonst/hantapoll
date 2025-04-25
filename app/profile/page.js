@@ -118,7 +118,6 @@ export default function Home() {
 
   return (
     <div className={styles["mainlk"]} style={{ 
-        // backgroundColor: '#4B3D6E', 
         height: 'auto',
         display: 'flex',
         flexDirection: 'column',
@@ -129,7 +128,6 @@ export default function Home() {
         backgroundRepeat: 'no-repeat',
         minHeight: '100vh',
       }}>
-      {/* Новая шапка */}
       <header className={styles["app-header"]}>
         <Link href="/" className={styles["logo"]}>HantaPoll</Link>
         <div className={styles["header-nav"]}>

@@ -277,7 +277,8 @@ const PollResultsPage = () => {
         <div className={styles.pageContainer} style={{
             backgroundColor: '#fff',
             color: '#000',
-            textDecoration: 'none'
+            textDecoration: 'none',
+            minHeight: '100vh'
         }}>
             <header className={styles["app-header"]}>
                 <Link href="/" className={styles["logo"]}>HantaPoll</Link>

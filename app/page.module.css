@@ -283,7 +283,6 @@
   width: 43%;
   height: 100%;
   background-color: #ffffff;
-  /* box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; */
   border: solid 1px #e2e2e2;
   border-radius: 10px;
   padding: 20px;
@@ -1364,8 +1363,6 @@
 .homeContainer {
   font-family: 'San Francisco', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 20px;
-  /* width: 1200px;
-  margin: 0 auto; */
 }
 
 .saveButton {
@@ -2138,7 +2135,6 @@
   color: #666;
 }
 
-/* Стили для шапки */
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -2171,7 +2167,6 @@
   cursor: pointer;
 }
 
-/* Обновленный контейнер */
 .poll-creator-container {
   display: flex;
   flex-direction: column;
@@ -2182,7 +2177,6 @@
   display: flex;
 }
 
-/* Стили для шапки */
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -2231,7 +2225,6 @@
   cursor: pointer;
 }
 
-/* Обновленный контейнер */
 .mainlk {
   display: flex;
   flex-direction: column;
@@ -2240,8 +2233,6 @@
   font-family: 'San Francisco', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-
-/* Стили для шапки */
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -2289,7 +2280,6 @@
   cursor: pointer;
 }
 
-/* Контейнеры */
 .mainlk {
   display: flex;
   flex-direction: column;
@@ -2298,12 +2288,9 @@
 }
 
 .homeContainer {
-  /* margin: 1rem;
-  padding: 1rem; */
   border-radius: 8px;
 }
 
-/* Стили для опросов */
 .pollsSection {
   margin-top: 1rem;
   background-color: #4B3D6E00;
@@ -2326,6 +2313,17 @@
   color: white;
 }
 
+.delButton {
+  background-color: #ff5555;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  border: none;
+  margin-top: 5px;
+  height: 25px;
+}
+
 .actionButton {
   padding: 8px 12px;
   background-color: #4B3D6E;
@@ -2333,16 +2331,13 @@
   text-decoration: none;
   border-radius: 4px;
   font-size: 14px;
+  border: none;
 }
 
 .actionButton:hover {
-  padding: 8px 12px;
   background-color: #D1C6E7;
   border: solid 1px #ffffff;
   color: rgb(255, 255, 255);
-  text-decoration: none;
-  border-radius: 4px;
-  font-size: 14px;
 }
 
 .pollItem {
@@ -2358,8 +2353,6 @@
 
 .pollActions {
   display: flex;
-  /* gap: 0.5rem;
-  margin-top: 0.5rem; */
 }
 
 .exportButton {
@@ -2379,7 +2372,6 @@
   background-color: #D1C6E7;
 }
 
-/* Стили для уведомлений */
 .Toastify__toast-container {
   font-size: 14px;
 }
@@ -2396,7 +2388,6 @@
   background: #2196F3;
 }
 
-/* Стили для вкладок настроек */
 .settings-tabs {
   display: flex;
   gap: 20px;
@@ -2433,7 +2424,6 @@
   font-weight: bold;
 }
 
-/* Стили для шкалы */
 .scale-controls {
   display: flex;
   gap: 15px;
@@ -2444,7 +2434,6 @@
   flex: 1;
 }
 
-/* Стили для кнопок удаления */
 .remove-question-btn {
   background: none;
   border: none;
@@ -2462,7 +2451,6 @@
   margin-left: 5px;
 }
 
-/* Стили для раздела публикации */
 .poll-share-section {
   margin-top: 40px;
   padding: 20px;
@@ -2507,7 +2495,6 @@
   font-size: 14px;
 }
 
-/* Добавьте эти стили в ваш CSS-файл */
 .poll-creator-container {
   display: flex;
   flex-direction: column;
@@ -2672,12 +2659,6 @@
   margin-top: 2rem;
 }
 
-/* CSS переменные для дизайна */
-/* :root {
-  --primary-color: #4CAF50;
-  --secondary-color: #2196F3;
-  --font-family: 'Arial, sans-serif';
-} */
 
 .pollContainer {
   max-width: 800px;
@@ -2895,15 +2876,6 @@
   margin: 5px;
 }
 
-/* .question-type {
-  padding: 0.5rem;
-  border: 1px solid #e9e9e9;
-  border-radius: 4px;
-  appearance:initial;
-} */
-
-
-/* page.module.css */
 
 .publicPollsContainer {
   margin: 0 auto;
@@ -3059,4 +3031,11 @@
     width: 370px;
     
   }
+}
+
+.creatorWarning {
+  color: #f32121;
+  text-align: center;
+  margin: 20px;
+  text-decoration: underline;
 }
