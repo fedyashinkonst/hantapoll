@@ -74,7 +74,9 @@ export const MainBlock = () => {
   }
 
   return (
-    <div className={styles["mainBlock"]}>
+    <div className={styles["mainBlock"]} style={{
+      maxWidth: '100%'
+    }}>
       <div className={styles["unmainblock"]}>
         <motion.div 
           className={styles["header"]}

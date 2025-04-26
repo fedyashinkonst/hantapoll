@@ -580,7 +580,7 @@
     display: none;
   }
   .heading{
-    margin-top: 80px;
+    margin-top: 60px;
     font-size: 30px;
     width: 100%;
   }
@@ -751,6 +751,16 @@
   }
   .svgmob {
     margin-right: 10px;
+  }
+  .footermain{max-width: 100%;}
+  .mainWorkmob{
+    max-width: 100%;
+  }
+  .mainWe {
+    max-width: 100%;
+  }
+  .aboutMain {
+    max-width: 100%;
   }
 }
 
@@ -2998,8 +3008,10 @@
 
 @media (width <= 600px) {
   .homeContainer {
-    width: 500px;
-
+    width: 120%;
+  }
+  .homeContainer1 {
+    width: 90%;
   }
   .nav-link {
     text-decoration: none;
@@ -3030,6 +3042,25 @@
     flex-wrap: wrap;
     width: 370px;
     
+  }
+  .pollsSection {
+    width: 90%;
+    margin-left: 20px;
+  }
+  .poll-creator {
+    width: 100%;
+  }
+  .creator-header {
+    width: 100%;
+  }
+  .poll-title-input {
+    width: 100%;
+  }
+  .publish-btn {
+    width: 100%;
+  }
+  .questions-container {
+    width: 100%;
   }
 }
 

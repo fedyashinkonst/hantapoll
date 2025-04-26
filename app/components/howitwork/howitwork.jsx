@@ -3,7 +3,9 @@ import styles from "@/app/page.module.css";
 
 export const HowItWork = (props) => {
     return (
-        <div className={styles["mainWork"]} id='more'>
+        <div className={styles["mainWork"]} id='more' style={{
+            maxWidth: '100%'
+          }}>
             <div className={styles["infoWork"]}>
                 <br/>
                 <h1 className={styles["bigtxtWork"]}>КАК ЭТО РАБОТАЕТ</h1><br/><br/><br/>

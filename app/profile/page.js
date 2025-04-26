@@ -101,7 +101,7 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className={styles["homeContainer"]}
+      <div className={styles["homeContainer1"]}
       style={{
         backgroundImage: 'url("/Group 23.png")',
     backgroundSize: 'cover',
@@ -143,7 +143,8 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={styles["homeContainer"]}>
+      <div className={styles["homeContainer1"]}>
+        <br/>
         <div className={styles["profileHeader"]}>
           <h1 className={styles["profileHeaderh1"]}>Настройки профиля</h1>
         </div><br/><br/>
