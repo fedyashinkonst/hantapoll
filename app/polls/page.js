@@ -6,12 +6,15 @@ import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, Ema
 import Link from 'next/link';
 import styles from '../page.module.css';
 import { onAuthStateChanged } from 'firebase/auth';
+import { PulseLoader } from 'react-spinners';
+import { Footer } from '../components/footer1/foot';
 
 export default function Home() {
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     currentPassword: '',
@@ -100,7 +103,67 @@ export default function Home() {
     }
   };
 
-  if (loading) return <div className={styles.loading}>Загрузка...</div>;
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setShowProfileMenu(false);
+    } catch (error) {
+      setError('Ошибка при выходе: ' + error.message);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    try {
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        formData.currentPassword
+      );
+      await reauthenticateWithCredential(user, credential);
+
+      if (formData.email !== user.email) {
+        await updateEmail(user, formData.email);
+      }
+
+      if (formData.newPassword && formData.newPassword === formData.confirmPassword) {
+        await updatePassword(user, formData.newPassword);
+      }
+
+      setSuccess('Профиль успешно обновлен!');
+      setEditMode(false);
+      setShowProfileMenu(false);
+    } catch (error) {
+      setError('Ошибка обновления: ' + error.message);
+      console.error(error);
+    }
+  };
+
+  const toggleProfileMenu = () => {
+    setShowProfileMenu(!showProfileMenu);
+    setEditMode(false);
+    setError('');
+    setSuccess('');
+  };
+
+  if (loading) return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      backgroundColor: '#D6E8EE'
+    }}>
+      <PulseLoader color="#02457A" size={15} margin={5} />
+    </div>
+  );
 
   if (!user) {
     return (
@@ -112,6 +175,7 @@ export default function Home() {
   }
 
   return (
+    <>
     <div 
       className={styles["mainlk"]} 
       style={{ 
@@ -119,15 +183,12 @@ export default function Home() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        backgroundImage: 'url("/Group 23.png")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh',
+        backgroundColor: "#D6E8EE",
+        minHeight: '90vh',
       }}
     >
       <header className={styles["app-header"]} style={{ 
-        backgroundColor: '#FFF',
+        backgroundColor: '#D6E8EE',
         width: '100%',
       }}>
         <Link href="/" className={styles["logo"]}>HantaPoll</Link>
@@ -139,12 +200,113 @@ export default function Home() {
             Мои опросы
           </Link></strong></u>
         </div>
-        <Link href="/profile"><div className={styles["user-avatar"]}>
-          {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-        </div></Link>
+        <div className={styles["user-avatar-container"]}>
+          <div 
+            className={styles["user-avatar"]}
+            onClick={toggleProfileMenu}
+          >
+            {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+          </div>
+          
+          {showProfileMenu && (
+            <div className={styles["profile-menu"]}>
+              <div className={styles["profile-menu-header"]}>
+                <div className={styles["profile-avatar"]}>
+                  {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className={styles["profile-email"]}>{user.email}</div>
+              </div>
+              
+              {!editMode ? (
+                <>
+                  <button 
+                    onClick={() => setEditMode(true)}
+                    className={styles["profile-menu-button"]}
+                  >
+                    Редактировать профиль
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className={styles["profile-menu-button-rem"]}
+                  >
+                    Выйти
+                  </button>
+                </>
+              ) : (
+                <form onSubmit={handleUpdateProfile} className={styles["profile-menu-form"]}>
+                  <div className={styles["form-group"]}>
+                    <label>Email:</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles["form-group"]}>
+                    <label>Текущий пароль:</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={formData.currentPassword}
+                      placeholder="Текущий пароль" 
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles["form-group"]}>
+                    <label>Новый пароль:</label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={formData.newPassword}
+                      placeholder="Новый пароль" 
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {formData.newPassword && (
+                    <div className={styles["form-group"]}>
+                      <label>Подтвердите пароль:</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+
+                  {error && <div className={styles["error-message"]}>{error}</div>}
+                  {success && <div className={styles["success-message"]}>{success}</div>}
+
+                  <div className={styles["form-actions"]}>
+                    <button type="submit" className={styles["save-button"]}>
+                      Сохранить
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setEditMode(false);
+                        setError('');
+                        setSuccess('');
+                      }}
+                      className={styles["cancel-button"]}
+                    >
+                      Отмена
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+        </div>
       </header>
 
-      <div className={styles["homeContainer"]} style={{ backgroundColor: '#4B3D6E00' }}>
+      <div className={styles["homeContainer"]} style={{ backgroundColor: '#02457A00' }}>
         <div className={styles["profileHeader"]}>
         </div>
         <div className={styles["pollsSection"]}>
@@ -161,7 +323,7 @@ export default function Home() {
           ) : (
             <div className={styles["pollsList"]}>
               {polls.map(poll => (
-                <div key={poll.id} className={styles["pollItem"]} style={{ backgroundColor: '#FFFFFF' }}>
+                <div key={poll.id} className={styles["pollItem"]} style={{ backgroundColor: '#D6E8EE' }}>
                   <h3>{poll.title}</h3><br/>
                   <p>Вопросов: {poll.questions.length}</p>
                   <p>Ответов: {poll.responsesCount || 0}</p>
@@ -191,6 +353,9 @@ export default function Home() {
           )}
         </div> <br/>
       </div>
+      
     </div>
+    <Footer/>
+    </>
   );
 }

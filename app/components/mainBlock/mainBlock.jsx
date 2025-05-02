@@ -7,6 +7,7 @@ import { auth } from '@/lib/firebaseConfig';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
+import { PulseLoader } from 'react-spinners';
 
 export const MainBlock = () => {
   const [user, setUser] = useState(null);
@@ -69,9 +70,17 @@ export const MainBlock = () => {
     }
   };
 
-  if (loading) {
-    return <div className={styles.loading}>Загрузка...</div>;
-  }
+  if (loading) return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      backgroundColor: '#D6E8EE'
+    }}>
+      <PulseLoader color="#02457A" size={15} margin={5} />
+    </div>
+  );
 
   return (
     <div className={styles["mainBlock"]} style={{

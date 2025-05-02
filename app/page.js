@@ -7,7 +7,7 @@ import { Work } from "./components/work/work";
 
 export default function Home() {
   return (
-    <div style={{ backgroundColor: 'white'}}>
+    <div style={{ backgroundColor: 'D6E8EE'}}>
       <MainBlock/>
       <AboutUs/>
       <WhyWe/>

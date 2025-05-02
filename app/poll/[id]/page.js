@@ -7,6 +7,8 @@ import styles from '@/app/page.module.css';
 import { onAuthStateChanged } from 'firebase/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { PulseLoader } from 'react-spinners';
+
 
 const TakePollPage = () => {
     const { id } = useParams();
@@ -208,7 +210,17 @@ const TakePollPage = () => {
         }
     };
 
-    if (!poll || !authChecked) return <div className={styles.loading}>Загрузка опроса...</div>;
+    if (!poll || !authChecked) return (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: '#D6E8EE'
+        }}>
+          <PulseLoader color="#FFB871" size={15} margin={5} />
+        </div>
+    );
 
     if (isSubmitted) {
         return (
@@ -236,6 +248,8 @@ const TakePollPage = () => {
         <div className={styles.pollContainer}
              style={{ 
                  fontFamily: designSettings.fontFamily,
+                 border: 'solid 1px',
+                 borderColor: designSettings.primaryColor ,
                  backgroundColor: designSettings.primaryColor 
              }}>
             <ToastContainer position="top-right" autoClose={3000} />
@@ -273,7 +287,7 @@ const TakePollPage = () => {
             {poll.questions.map((question) => (
                 <div key={question.id} 
                      className={styles.questionCard}
-                     style={{ borderColor: designSettings.primaryColor, border: 'solid 1px #fff', borderColor: designSettings.primaryColor  }}>
+                     style={{ borderColor: designSettings.primaryColor, border: 'solid 1px', borderColor: designSettings.secondaryColor  }}>
                     <h3 className={styles.questionText}>{question.text}</h3>
                     
                     {question.type === 'text' ? (

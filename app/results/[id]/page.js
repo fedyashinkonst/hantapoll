@@ -12,6 +12,9 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
+import { PulseLoader } from 'react-spinners';
+import { Footer } from '@/app/components/footer1/foot';
+import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
 ChartJS.register(
   ArcElement,
@@ -26,19 +29,38 @@ ChartJS.register(
 
 const PollResultsPage = () => {
     const { id } = useParams();
+    const [formData, setFormData] = useState({
+        email: '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
     const [poll, setPoll] = useState(null);
     const [responses, setResponses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [chartData, setChartData] = useState([]);
     const [activeTab, setActiveTab] = useState('charts');
     const [chartType, setChartType] = useState('bar');
     const [filter, setFilter] = useState('all');
     const [user, setUser] = useState(null);
+    const [editMode, setEditMode] = useState(false);
+    const [success, setSuccess] = useState('');
     const resultsRef = useRef(null);
+    const toggleProfileMenu = () => {
+        setShowProfileMenu(!showProfileMenu);
+        setEditMode(false);
+        setError('');
+        setSuccess('');
+      };
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
+            if (user) {
+                setFormData(prev => ({ ...prev, email: user.email || '' }));
+            }
         });
 
         const fetchData = async () => {
@@ -247,6 +269,52 @@ const PollResultsPage = () => {
         toast.success('Результаты экспортированы в PNG');
     };
 
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+    
+        try {
+          if (!user) throw new Error('Пользователь не авторизован');
+          
+          const credential = EmailAuthProvider.credential(
+            user.email,
+            formData.currentPassword
+          );
+          await reauthenticateWithCredential(user, credential);
+    
+          if (formData.email !== user.email) {
+            await updateEmail(user, formData.email);
+          }
+    
+          if (formData.newPassword && formData.newPassword === formData.confirmPassword) {
+            await updatePassword(user, formData.newPassword);
+          }
+    
+          setSuccess('Профиль успешно обновлен!');
+          setEditMode(false);
+          setShowProfileMenu(false);
+        } catch (error) {
+          setError('Ошибка обновления: ' + error.message);
+          console.error(error);
+        }
+      };
+
+      const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+      };
+
+    const handleLogout = async () => {
+        try {
+          await signOut(auth);
+          setShowProfileMenu(false);
+        } catch (error) {
+          console.error('Logout error:', error);
+          setError('Ошибка при выходе: ' + error.message);
+        }
+      };
+
     const copyPollLink = async () => {
         try {
             const pollUrl = `${window.location.origin}/poll/${id}`;
@@ -270,38 +338,150 @@ const PollResultsPage = () => {
         }
     };
 
-    if (loading) return <div className={styles.loading}>Загрузка результатов...</div>;
+    if (loading) return (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: '#D6E8EE'
+        }}>
+          <PulseLoader color="#02457A" size={15} margin={5} />
+        </div>
+      );
     if (!poll) return <div className={styles.error}>Опрос не найден</div>;
 
     return (
         <div className={styles.pageContainer} style={{
-            backgroundColor: '#fff',
+            backgroundColor: '#D6E8EE',
             color: '#000',
             textDecoration: 'none',
             minHeight: '100vh'
         }}>
-            <header className={styles["app-header"]}>
-                <Link href="/" className={styles["logo"]}>HantaPoll</Link>
-                <div className={styles["header-nav"]}>
-                    <Link href="/pollbuild" className={styles["nav-link"]}>
-                        Конструктор опросов
-                    </Link>
-                    <Link href="/polls" className={styles["nav-link"]}>
-                        Мои опросы
-                    </Link>
+            <header className={styles["app-header"]} style={{ 
+        backgroundColor: '#D6E8EE',
+        width: '100%',
+      }}>
+        <Link href="/" className={styles["logo"]}>HantaPoll</Link>
+        <div className={styles["header-nav"]}>
+          <Link href="/pollbuild" className={styles["nav-link"]}>
+            Конструктор опросов
+          </Link>
+          <Link href="/polls" className={styles["nav-link"]}>
+            Мои опросы
+          </Link>
+        </div>
+        <div className={styles["user-avatar-container"]}>
+          <div 
+            className={styles["user-avatar"]}
+            onClick={toggleProfileMenu}
+          >
+            {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+          </div>
+          
+          {showProfileMenu && (
+            <div className={styles["profile-menu"]}>
+              <div className={styles["profile-menu-header"]}>
+                <div className={styles["profile-avatar"]}>
+                  {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
                 </div>
-                <Link href="/profile"><div className={styles["user-avatar"]}>
-                    {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-                </div></Link>
-            </header>
+                <div className={styles["profile-email"]}>{user?.email || 'Неизвестный пользователь'}</div>
+              </div>
+              
+              {!editMode ? (
+                <>
+                  <button 
+                    onClick={() => setEditMode(true)}
+                    className={styles["profile-menu-button"]}
+                  >
+                    Редактировать профиль
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className={styles["profile-menu-button-rem"]}
+                  >
+                    Выйти
+                  </button>
+                </>
+              ) : (
+                <form onSubmit={handleUpdateProfile} className={styles["profile-menu-form"]}>
+                  <div className={styles["form-group"]}>
+                    <label>Email:</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
 
-            <div className={styles.resultsContainer} ref={resultsRef} style={{
-                boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
-            }}>
+                  <div className={styles["form-group"]}>
+                    <label>Текущий пароль:</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={formData.currentPassword}
+                      placeholder="Текущий пароль" 
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles["form-group"]}>
+                    <label>Новый пароль:</label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={formData.newPassword}
+                      placeholder="Новый пароль" 
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {formData.newPassword && (
+                    <div className={styles["form-group"]}>
+                      <label>Подтвердите пароль:</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+
+                  {error && <div className={styles["error-message"]}>{error}</div>}
+                  {success && <div className={styles["success-message"]}>{success}</div>}
+
+                  <div className={styles["form-actions"]}>
+                    <button type="submit" className={styles["save-button"]}>
+                      Сохранить
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setEditMode(false);
+                        setError('');
+                        setSuccess('');
+                      }}
+                      className={styles["cancel-button"]}
+                    >
+                      Отмена
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
+
+            <div className={styles.resultsContainer} ref={resultsRef}>
                 <ToastContainer position="top-right" autoClose={3000} />
                 
                 <div className={styles.resultsHeader}>
-                    <h1 className={styles.maintxt}>АНАЛИТИКА ОПРОСА: "{poll.title}"</h1>
+                    <h1 className={styles.maintxt}>АНАЛИТИКА ОПРОСА "{poll.title}"</h1>
                 </div>
 
                 <div className={styles.summaryInfo}>
@@ -385,7 +565,7 @@ const PollResultsPage = () => {
                                                     datasets: [{
                                                         data: chart.counts,
                                                         backgroundColor: [
-                                                            '#4B3D6E',
+                                                            '#02457A',
                                                             '#3B536A',
                                                             '#2D4A6E',
                                                             '#1E3D6E',
@@ -423,8 +603,8 @@ const PollResultsPage = () => {
                                                     datasets: [{
                                                         label: 'Количество ответов',
                                                         data: chart.counts,
-                                                        borderColor: '#4B3D6E',
-                                                        backgroundColor: '#4B3D6E55',
+                                                        borderColor: '#02457A',
+                                                        backgroundColor: '#02457A55',
                                                         tension: 0.1,
                                                         fill: true
                                                     }]
@@ -465,7 +645,7 @@ const PollResultsPage = () => {
                                                     datasets: [{
                                                         label: 'Количество ответов',
                                                         data: chart.counts,
-                                                        backgroundColor: '#4B3D6E',
+                                                        backgroundColor: '#02457A',
                                                     }]
                                                 }}
                                                 options={{
@@ -579,6 +759,31 @@ const PollResultsPage = () => {
                         </button>
                     </div>
             </div>
+            <footer className={styles.footerContainer}>
+            <div className={styles.footerWrapper}>
+                <div className={styles.footerLogo}>HantaPoll</div>
+                
+                <div className={styles.footerMainContent}>
+                    <p className={styles.footerCopyright}>
+                        © 2025 HantaPoll — платформа для интерактивных опросов и квизов <br />
+                        Поддержка: support@hantapoll.com | Telegram: @hantapoll_support
+                    </p>
+                    
+                    <div className={styles.footerLinksContainer}>
+                        <div className={styles.footerLinksColumn}>
+                            <Link href="example" className={styles.footerLink}>• Политика конфиденциальности</Link>
+                            <Link href="example" className={styles.footerLink}>• Условия использования</Link>
+                            <Link href="example" className={styles.footerLink}>• О компании</Link>
+                        </div>
+                        <div className={styles.footerLinksColumn}>
+                            <Link href="example" className={styles.footerLink}>• Тарифы</Link>
+                            <Link href="example" className={styles.footerLink}>• API для разработчиков</Link>
+                            <Link href="example" className={styles.footerLink}>• Блог</Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
         </div>
     );
 };

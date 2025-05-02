@@ -6,13 +6,15 @@ import Link from 'next/link';
 import styles from '@/app/page.module.css';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebaseConfig';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { PulseLoader } from 'react-spinners';
 
 const PublicPollsPage = () => {
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [user, setUser] = useState(null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -59,26 +61,85 @@ const PublicPollsPage = () => {
     }
   };
 
-  if (loading) return <div className={styles.loading}>Загрузка опросов...</div>;
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setShowProfileMenu(false);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  if (loading) return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      backgroundColor: '#D6E8EE'
+    }}>
+      <PulseLoader color="#02457A" size={15} margin={5} />
+    </div>
+  );
 
   return (
     <div className={styles.publicPollsContainer} style={{
-        height: 'auto',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundImage: 'url("/Group 23.png")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    minHeight: '100vh',
-     }}>
+      height: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      backgroundColor:'#D6E8EE',
+      minHeight: '100vh',
+    }}>
+      <header className={styles["app-header1"]} style={{ 
+        backgroundColor: '#D6E8EE',
+        width: '100%',
+      }}>
+        <Link href="/" className={styles["logo"]}>HantaPoll</Link>
+        <div className={styles["header-nav"]}>
+          {user ? (
+            <div className={styles["user-avatar-container"]}>
+              <div 
+                className={styles["user-avatar"]}
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+              >
+                {user.email?.charAt(0).toUpperCase()}
+              </div>
+              
+              {showProfileMenu && (
+                <div className={styles["profile-menu"]}>
+                  <div className={styles["profile-menu-header"]}>
+                    <div className={styles["profile-avatar"]}>
+                      {user.email?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className={styles["profile-email"]}>
+                      {user.email}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className={styles["profile-menu-button-rem"]}
+                  >
+                    Выйти
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/login" className={styles["nav-link"]}>
+              Войти
+            </Link>
+          )}
+        </div>
+      </header>
+
       <div className={styles.pollsHeader}>
         <h1>Публичные опросы</h1>
         <div className={styles.searchBar}>
           <input
             type="text"
-            placeholder="Поиск опросов..."
+            placeholder="Поиск опроса..."
+            className={styles.searchBar}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -111,9 +172,9 @@ const PublicPollsPage = () => {
               </div>
               
               <div className={styles.pollFooter}>
-                <button className={styles.takePollButton}>
+                <a className={styles.takePollLink}>
                   Пройти опрос
-                </button>
+                </a>
               </div>
             </div>
           ))

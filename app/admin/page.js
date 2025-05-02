@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { collection, getDocs, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 import { app, auth, db } from '@/lib/firebaseConfig';
 import { getAuth, deleteUser } from 'firebase/auth';
+import { PulseLoader } from 'react-spinners';
 import styles from '../page.module.css';
 
 const AdminPage = () => {
@@ -131,7 +132,7 @@ const AdminPage = () => {
   return (
     <div className={styles.adminContainer}
       style={{
-        backgroundColor: '#fff'
+        backgroundColor: '#D6E8EE'
       }}>
       <div className={styles.header}>
         <h1 className={styles.headerh1}>АДМИНКА</h1>
@@ -140,7 +141,17 @@ const AdminPage = () => {
         </button>
       </div>
 
-      {loading && <p className={styles.loading}>Загрузка данных...</p>}
+      {loading && 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: '#D6E8EE'
+        }}>
+          <PulseLoader color="#02457A" size={15} margin={5} />
+        </div>
+      }
       {error && <p className={styles.error}>{error}</p>}
 
       

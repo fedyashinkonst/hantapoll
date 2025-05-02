@@ -9,9 +9,19 @@ import Link from 'next/link';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import QRCode from 'react-qr-code';
+import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
 const PollCreator = () => {
   const [pollTitle, setPollTitle] = useState('НАЗВАНИЕ ОПРОСА');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
   const [questions, setQuestions] = useState([
     {
       id: 1,
@@ -23,9 +33,10 @@ const PollCreator = () => {
   ]);
   const [user, setUser] = useState(null);
   const [publishedPollId, setPublishedPollId] = useState(null);
+  const [error, setError] = useState('');
   const [designSettings, setDesignSettings] = useState({
-    primaryColor: '#ffffff',
-    secondaryColor: '#000000',
+    primaryColor: '#D6E8EE',
+    secondaryColor: '#001B48',
     fontFamily: 'Arial, sans-serif',
     logo: null
   });
@@ -39,6 +50,7 @@ const PollCreator = () => {
     isAnonymous: true,
     requireLogin: false
   });
+  const [showSettings, setShowSettings] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -240,7 +252,60 @@ const PollCreator = () => {
         console.error("Ошибка при публикации опроса:", error);
         toast.error('Ошибка при публикации опроса');
     }
-};
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setShowProfileMenu(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+      setError('Ошибка при выходе: ' + error.message);
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!user) return;
+
+    try {
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        formData.currentPassword
+      );
+      await reauthenticateWithCredential(user, credential);
+
+      if (formData.email !== user.email) {
+        await updateEmail(user, formData.email);
+      }
+
+      if (formData.newPassword && formData.newPassword === formData.confirmPassword) {
+        await updatePassword(user, formData.newPassword);
+      }
+
+      setSuccess('Профиль успешно обновлен!');
+      setEditMode(false);
+      setShowProfileMenu(false);
+    } catch (error) {
+      setError('Ошибка обновления: ' + error.message);
+      console.error(error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const toggleProfileMenu = () => {
+    setShowProfileMenu(!showProfileMenu);
+    setEditMode(false);
+    setError('');
+    setSuccess('');
+  };
 
   const pollUrl = publishedPollId ? `${window.location.origin}/poll/${publishedPollId}` : '';
 
@@ -251,27 +316,128 @@ const PollCreator = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        backgroundImage: 'url("/Group 23.png")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundColor: '#D6E8EE'
       }}
     >
       <ToastContainer />
       
-      <header className={styles["app-header"]}>
+      <header className={styles["app-header"]} style={{ 
+        backgroundColor: '#D6E8EE',
+        width: '100%',
+      }}>
         <Link href="/" className={styles["logo"]}>HantaPoll</Link>
         <div className={styles["header-nav"]}>
-          <u><strong><Link href="/pollbuild" className={styles["nav-link"]}>
+        <u><strong><Link href="/pollbuild" className={styles["nav-link"]}>
             Конструктор опросов
           </Link></strong></u>
-          <Link href="/polls" className={styles["nav-link"]}>
+        <Link href="/polls" className={styles["nav-link"]}>
             Мои опросы
           </Link>
         </div>
-        <Link href="/profile"><div className={styles["user-avatar"]}>
-          {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-        </div></Link>
+        <div className={styles["user-avatar-container"]}>
+          <div 
+            className={styles["user-avatar"]}
+            onClick={toggleProfileMenu}
+          >
+            {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+          </div>
+          
+          {showProfileMenu && (
+            <div className={styles["profile-menu"]}>
+              <div className={styles["profile-menu-header"]}>
+                <div className={styles["profile-avatar"]}>
+                  {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className={styles["profile-email"]}>{user?.email || ''}</div>
+              </div>
+              
+              {!editMode ? (
+                <>
+                  <button 
+                    onClick={() => setEditMode(true)}
+                    className={styles["profile-menu-button"]}
+                  >
+                    Редактировать профиль
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className={styles["profile-menu-button-rem"]}
+                  >
+                    Выйти
+                  </button>
+                </>
+              ) : (
+                <form onSubmit={handleUpdateProfile} className={styles["profile-menu-form"]}>
+                  <div className={styles["form-group"]}>
+                    <label>Email:</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles["form-group"]}>
+                    <label>Текущий пароль:</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={formData.currentPassword}
+                      placeholder="Текущий пароль" 
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles["form-group"]}>
+                    <label>Новый пароль:</label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={formData.newPassword}
+                      placeholder="Новый пароль" 
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {formData.newPassword && (
+                    <div className={styles["form-group"]}>
+                      <label>Подтвердите пароль:</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+
+                  {error && <div className={styles["error-message"]}>{error}</div>}
+                  {success && <div className={styles["success-message"]}>{success}</div>}
+
+                  <div className={styles["form-actions"]}>
+                    <button type="submit" className={styles["save-button"]}>
+                      Сохранить
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setEditMode(false);
+                        setError('');
+                        setSuccess('');
+                      }}
+                      className={styles["cancel-button"]}
+                    >
+                      Отмена
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+        </div>
       </header>
 
       {!publishedPollId ? (
@@ -282,7 +448,8 @@ const PollCreator = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#ffffff00'
+          width: '100%',
+          backgroundColor: '#D6E8EE'
         }}>
           <div className={styles["creator-header"]}>
             <input
@@ -403,6 +570,7 @@ const PollCreator = () => {
                     </button>
                   </div>
                 ) : null}
+                
               </div>
             ))}
 
@@ -411,142 +579,207 @@ const PollCreator = () => {
             </button><br/><br/><br/>
           </div>
 
-          <div className={styles["settings-tabs"]}>
-            <div className={styles["settings-section"]}>
-              <h3>Настройки дизайна</h3>
-              <div className={styles["design-controls"]}>
-                <div className={styles["form-group"]}>
-                  <label>Основной цвет:</label>
-                  <input
-                    type="color"
-                    name="primaryColor"
-                    value={designSettings.primaryColor}
-                    onChange={handleDesignChange}
-                  />
-                </div>
-                <div className={styles["form-group"]}>
-                  <label>Дополнительный цвет:</label>
-                  <input
-                    type="color"
-                    name="secondaryColor"
-                    value={designSettings.secondaryColor}
-                    onChange={handleDesignChange}
-                  />
-                </div>
-                <div className={styles["form-group"]}>
-                  <label>Шрифт:</label>
-                  <select
-                    name="fontFamily"
-                    value={designSettings.fontFamily}
-                    onChange={handleDesignChange}
-                    className={styles["question-type"]}
-                  >
-                    <option value="Arial, sans-serif">Arial</option>
-                    <option value="Helvetica, sans-serif">Helvetica</option>
-                    <option value="'Times New Roman', serif">Times New Roman</option>
-                  </select>
-                </div>
-                <div className={styles["form-group"]}>
-                  <label>Логотип:</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                  />
-                  {designSettings.logo && (
-                    <div className={styles["logo-preview"]}>
-                      <img 
-                        src={designSettings.logo} 
-                        alt="Логотип опроса" 
-                        style={{ maxWidth: '100px', maxHeight: '50px' }}
-                      />
-                      <button 
-                        onClick={() => setDesignSettings(prev => ({ ...prev, logo: null }))}
-                        className={styles["remove-logo-btn"]}
-                      >
-                        Удалить
-                      </button>
+          {!showSettings && (
+            <>
+            <a 
+              onClick={() => setShowSettings(true)}
+              className={styles["show-settings-btn"]}
+            >
+              Настройки опроса
+            </a>
+            <footer className={styles.footerContainer}>
+            <div className={styles.footerWrapper}>
+                <div className={styles.footerLogo}>HantaPoll</div>
+                
+                <div className={styles.footerMainContent}>
+                    <p className={styles.footerCopyright}>
+                        © 2025 HantaPoll — платформа для интерактивных опросов и квизов <br />
+                        Поддержка: support@hantapoll.com | Telegram: @hantapoll_support
+                    </p>
+                    
+                    <div className={styles.footerLinksContainer}>
+                        <div className={styles.footerLinksColumn}>
+                            <Link href="example" className={styles.footerLink}>• Политика конфиденциальности</Link>
+                            <Link href="example" className={styles.footerLink}>• Условия использования</Link>
+                            <Link href="example" className={styles.footerLink}>• О компании</Link>
+                        </div>
+                        <div className={styles.footerLinksColumn}>
+                            <Link href="example" className={styles.footerLink}>• Тарифы</Link>
+                            <Link href="example" className={styles.footerLink}>• API для разработчиков</Link>
+                            <Link href="example" className={styles.footerLink}>• Блог</Link>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </footer>
+        </>
+          )}
+
+          {showSettings && (
+            <div className={styles["settings-tabs"]}>
+              <div className={styles["settings-section"]}>
+                <h3>Настройки дизайна</h3>
+                <div className={styles["design-controls"]}>
+                  <div className={styles["form-group"]}>
+                    <label>Основной цвет:</label>
+                    <input
+                      type="color"
+                      name="primaryColor"
+                      value={designSettings.primaryColor}
+                      onChange={handleDesignChange}
+                      className={styles["clr"]}
+                    />
+                  </div>
+                  <div className={styles["form-group"]}>
+                    <label>Дополнительный цвет:</label>
+                    <input
+                      type="color"
+                      name="secondaryColor"
+                      value={designSettings.secondaryColor}
+                      onChange={handleDesignChange}
+                      className={styles["clr"]}
+                    />
+                  </div>
+                  <div className={styles["form-group"]}>
+                    <label>Шрифт:</label>
+                    <select
+                      name="fontFamily"
+                      value={designSettings.fontFamily}
+                      onChange={handleDesignChange}
+                      className={styles["question-type"]}
+                    >
+                      <option value="Arial, sans-serif">Arial</option>
+                      <option value="Helvetica, sans-serif">Helvetica</option>
+                      <option value="'Times New Roman', serif">Times New Roman</option>
+                    </select>
+                  </div>
+                  <div className={styles["form-group"]}>
+                    <label>Логотип:</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                    />
+                    {designSettings.logo && (
+                      <div className={styles["logo-preview"]}>
+                        <img 
+                          src={designSettings.logo} 
+                          alt="Логотип опроса" 
+                          style={{ maxWidth: '100px', maxHeight: '50px',marginTop:'10px' }}
+                        />
+                        <button 
+                          onClick={() => setDesignSettings(prev => ({ ...prev, logo: null }))}
+                          className={styles["remove-logo-btn"]}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles["settings-section"]}>
+                <h3>Настройки времени</h3>
+                <div className={styles["time-controls"]}>
+                  <div className={styles["form-group"]}>
+                    <label className={styles["timelim"]}>
+                      <input
+                        type="checkbox"
+                        name="hasTimeLimit"
+                        checked={timeSettings.hasTimeLimit}
+                        onChange={handleTimeChange}
+                      />
+                        Ограничить по времени
+                    </label>
+                  </div>
+                  {timeSettings.hasTimeLimit && (
+                    <>
+                      <div className={styles["form-group"]}>
+                        <label>Начало опроса:</label>
+                        <input
+                          type="datetime-local"
+                          name="startTime"
+                          value={timeSettings.startTime}
+                          onChange={handleTimeChange}
+                        />
+                      </div>
+                      <div className={styles["form-group"]}>
+                        <label>Окончание опроса:</label>
+                        <input
+                          type="datetime-local"
+                          name="endTime"
+                          value={timeSettings.endTime}
+                          onChange={handleTimeChange}
+                          min={timeSettings.startTime}
+                        />
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className={styles["settings-section"]}>
-              <h3>Настройки времени</h3>
-              <div className={styles["time-controls"]}>
-                <div className={styles["form-group"]}>
-                  <label className={styles["timelim"]}>
-                    <input
-                      type="checkbox"
-                      name="hasTimeLimit"
-                      checked={timeSettings.hasTimeLimit}
-                      onChange={handleTimeChange}
-                    />
-                      Ограничить по времени
-                  </label>
-                </div>
-                {timeSettings.hasTimeLimit && (
-                  <>
-                    <div className={styles["form-group"]}>
-                      <label>Начало опроса:</label>
+              <div className={styles["settings-section"]}>
+                <h3>Настройки доступа</h3>
+                <div className={styles["access-controls"]}>
+                  <div className={styles["form-group"]}>
+                    <label>
                       <input
-                        type="datetime-local"
-                        name="startTime"
-                        value={timeSettings.startTime}
-                        onChange={handleTimeChange}
+                        type="checkbox"
+                        name="isAnonymous"
+                        checked={pollSettings.isAnonymous}
+                        onChange={handlePollSettingChange}
+                        disabled={pollSettings.requireLogin}
                       />
-                    </div>
-                    <div className={styles["form-group"]}>
-                      <label>Окончание опроса:</label>
+                      Анонимные ответы
+                    </label>
+                    <p className={styles["setting-description"]}>
+                      Ответы не будут привязаны к пользователям
+                    </p>
+                  </div>
+                  <div className={styles["form-group"]}>
+                    <label>
                       <input
-                        type="datetime-local"
-                        name="endTime"
-                        value={timeSettings.endTime}
-                        onChange={handleTimeChange}
-                        min={timeSettings.startTime}
+                        type="checkbox"
+                        name="requireLogin"
+                        checked={pollSettings.requireLogin}
+                        onChange={handlePollSettingChange}
                       />
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className={styles["settings-section"]}>
-              <h3>Настройки доступа</h3>
-              <div className={styles["access-controls"]}>
-                <div className={styles["form-group"]}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="isAnonymous"
-                      checked={pollSettings.isAnonymous}
-                      onChange={handlePollSettingChange}
-                      disabled={pollSettings.requireLogin}
-                    />
-                    Анонимные ответы
-                  </label>
-                  <p className={styles["setting-description"]}>
-                    Ответы не будут привязаны к пользователям
-                  </p>
-                </div>
-                <div className={styles["form-group"]}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="requireLogin"
-                      checked={pollSettings.requireLogin}
-                      onChange={handlePollSettingChange}
-                    />
-                    Требовать авторизацию
-                  </label>
-                  <p className={styles["setting-description"]}>
-                    Только зарегистрированные пользователи смогут отвечать
-                  </p>
+                      Требовать авторизацию
+                    </label>
+                    <p className={styles["setting-description"]}>
+                      Только зарегистрированные пользователи смогут отвечать
+                    </p>
+                  </div>
                 </div>
               </div>
+              <footer className={styles.footerContainer}>
+            <div className={styles.footerWrapper}>
+                <div className={styles.footerLogo}>HantaPoll</div>
+                
+                <div className={styles.footerMainContent}>
+                    <p className={styles.footerCopyright}>
+                        © 2025 HantaPoll — платформа для интерактивных опросов и квизов <br />
+                        Поддержка: support@hantapoll.com | Telegram: @hantapoll_support
+                    </p>
+                    
+                    <div className={styles.footerLinksContainer}>
+                        <div className={styles.footerLinksColumn}>
+                            <Link href="example" className={styles.footerLink}>• Политика конфиденциальности</Link>
+                            <Link href="example" className={styles.footerLink}>• Условия использования</Link>
+                            <Link href="example" className={styles.footerLink}>• О компании</Link>
+                        </div>
+                        <div className={styles.footerLinksColumn}>
+                            <Link href="example" className={styles.footerLink}>• Тарифы</Link>
+                            <Link href="example" className={styles.footerLink}>• API для разработчиков</Link>
+                            <Link href="example" className={styles.footerLink}>• Блог</Link>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+        </footer>
+            </div>
+          )}
         </div>
       ) : (
         <div className={styles["poll-share-section"]}>
