@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HANTAPOLL 🚀  
 
-## Getting Started
+**Проект для хакатона: Платформа для создания и проведения опросов**  
 
-First, run the development server:
+## 📌 О проекте  
+**HANTAPOLL** — это удобная платформа для быстрого создания и проведения опросов. Проект разработан в рамках участия в хакатоне с целью предоставить пользователям простой и функциональный инструмент для сбора мнений.  
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🔹 Основные возможности:  
+✅ **Создание опросов** – интуитивно понятный конструктор.  
+✅ **Голосование** – пользователи могут быстро отвечать на вопросы.  
+✅ **Аналитика** – просмотр результатов в реальном времени.  
+✅ **Адаптивный дизайн** – работает на любых устройствах.  
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠 Технологии  
+- **Frontend**: HTML, CSS, JavaScript (React/Vue или другой фреймворк, если использовался)  
+- **Backend**: Node.js/Python (если есть серверная часть)  
+- **База данных**: Firebase/PostgreSQL/MongoDB (если используется)  
+- **Дополнительно**: API для интеграций, библиотеки для визуализации данных  
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🚀 Как запустить проект?  
+1. **Клонировать репозиторий**:  
+   ```bash
+   git clone https://github.com/ваш-username/HANTAPOLL.git
+   ```  
+2. **Установить зависимости**:  
+   ```bash
+   npm install  # или pip install -r requirements.txt для Python
+   ```  
+3. **Запустить сервер**:  
+   ```bash
+   npm start  # или python app.py
+   ```  
+4. **Открыть в браузере**:  
+   ```
+   http://localhost:3000  (или другой порт)
+   ```  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📊 Пример использования  
+1. Создайте опрос.  
+2. Поделитесь ссылкой с участниками.  
+3. Получайте ответы в реальном времени!  
 
-## Learn More
+## 👥 Команда проекта  
+- Федяшин Константин – разработчик/дизайнер/аналитик  
 
-To learn more about Next.js, take a look at the following resources:
+---  
+**💡 Идеи, баги, предложения?**  
+Пишите в тг (@fedashin)!  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
